@@ -14,7 +14,7 @@ const COMPANIES = ["Walk-in Guest", "Sato Events Co.", "Aegis Software", "Family
 
 const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-3 text-sm outline-none focus:border-slate-400 bg-white";
 
-function Toggle({ options, value, onChange, activeBg = "#0F172A" }) {
+function Toggle({ options, value, onChange, activeBg = "#0F172A", activeColor = "white" }) {
   return (
     <div className="inline-flex bg-slate-100 rounded-full p-1 text-sm font-semibold">
       {options.map((o) => (
@@ -22,7 +22,7 @@ function Toggle({ options, value, onChange, activeBg = "#0F172A" }) {
           key={o}
           onClick={() => onChange(o)}
           className="px-5 py-2 rounded-full transition-colors"
-          style={value === o ? { background: activeBg, color: "white" } : { color: "#64748B" }}
+          style={value === o ? { background: activeBg, color: activeColor, boxShadow: "0 1px 2px rgba(15,23,42,.12)" } : { color: "#64748B" }}
         >
           {o}
         </button>
@@ -62,7 +62,7 @@ export default function GeneralInfoScreen({ table, initial, onCancel, onSave }) 
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mb-5">
-            <Toggle options={["Standard", "Non-Chargeable"]} value={charge} onChange={setCharge} activeBg="#FFFFFF" />
+            <Toggle options={["Standard", "Non-Chargeable"]} value={charge} onChange={setCharge} activeBg="#FFFFFF" activeColor="#0F172A" />
             <Toggle options={["Dine In", "Take Away"]} value={service} onChange={setService} />
           </div>
 
