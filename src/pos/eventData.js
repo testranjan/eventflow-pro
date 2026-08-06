@@ -10,6 +10,9 @@ export const EC = {
   pinkLight: "#FCE7F3",
   red: "#EF4444",
   redLight: "#FEE2E2",
+  purple: "#9333EA",
+  purpleLight: "#F3E8FF",
+
   slate: "#0F5C7A",
 };
 
