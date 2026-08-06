@@ -301,7 +301,7 @@ function NotificationBell() {
    back to English restores the originals. */
 const JA_DICT = {
   // Navigation
-  "Dashboard": "ダッシュボード", "Take Order": "注文入力", "Tables": "テーブル", "Table List": "テーブル一覧",
+  "Dashboard": "ダッシュボード", "Self Service / Fastfood": "セルフサービス／ファストフード", "Tables": "テーブル", "Table List": "テーブル一覧",
   "Orders": "注文", "Settlement": "精算", "Customers": "顧客", "Inventory": "在庫", "Reports": "レポート",
   "Kitchen Display": "キッチンディスプレイ", "Promotions": "プロモーション", "Employees": "従業員",
   "Shift Management": "シフト管理", "Bill RePrint": "伝票再印刷", "Settings": "設定", "Home": "ホーム",
@@ -3295,7 +3295,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
         </div>
         <div className="ml-auto flex items-center gap-3 sm:gap-5 shrink-0 order-2 sm:order-3">
           <button onClick={() => setShowGeneralInfo(true)} className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm" style={{ color: C.orange }}>
-            <Info size={15} /> <span className="hidden xs:inline">OTHER INFO</span>
+            <Info size={15} /> <span className="hidden xs:inline">OTHER INFO{generalInfo?.cover ? ` · COVER ${generalInfo.cover}` : ""}</span>
           </button>
           <button onClick={onExit} className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm" style={{ color: C.blue }}>
             <ArrowUpRight size={15} /> <span className="hidden xs:inline">DASHBOARD</span>
