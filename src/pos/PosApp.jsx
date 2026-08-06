@@ -46,7 +46,7 @@ const C = {
 /* ---------------------------------- NAV DATA ---------------------------------- */
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "take-order", label: "Take Order", icon: ShoppingCart },
+  { id: "take-order", label: "Self Service / Fastfood", icon: ShoppingCart },
   { id: "tables", label: "Tables", icon: Grid3x3 },
   { id: "orders", label: "Orders", icon: Receipt },
   { id: "settlement", label: "Settlement", icon: Wallet },
@@ -637,7 +637,7 @@ function MobileBottomNav({ active, setActive }) {
 // functionality. Takeaway, Delivery & Event fill their place as genuinely new,
 // frequently-used order-entry shortcuts that don't otherwise have a dedicated home.
 const QUICK_ACTIONS = [
-  { label: "Take Order", sub: "Create new order", icon: ShoppingCart, color: C.green, bg: C.greenLight, target: "take-order" },
+  { label: "Self Service / Fastfood", sub: "Create new order", icon: ShoppingCart, color: C.green, bg: C.greenLight, target: "take-order" },
   { label: "Settlement", sub: "Settle order", icon: Wallet, color: C.blue, bg: C.blueLight, target: "settlement" },
   { label: "Tables", sub: "Table overview", icon: Grid3x3, color: C.orange, bg: C.orangeLight, target: "tables" },
   { label: "Inventory", sub: "Stock overview", icon: Package, color: C.purple, bg: C.purpleLight, target: "inventory" },
@@ -3348,7 +3348,9 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
                 className="text-sm outline-none w-full placeholder:text-slate-400"
               />
             </div>
-            <Button variant="secondary" size="sm" className="shrink-0 hidden sm:inline-flex"><ChevronLeft size={14} /> Other Info*</Button>
+            <Button variant="secondary" size="sm" onClick={() => setShowGeneralInfo(true)} className="shrink-0 hidden sm:inline-flex">
+              <ChevronLeft size={14} /> Other Info* {generalInfo?.cover ? `· Cover ${generalInfo.cover}` : ""}
+            </Button>
           </div>
 
           {/* Mobile: horizontal category chips */}
@@ -5785,7 +5787,7 @@ function AppShell() {
     shift: "Shift Management",
     reports: "Reports",
     tables: "Table List",
-    "take-order": "Take Order",
+    "take-order": "Self Service / Fastfood",
     orders: "Orders",
     settlement: "Bill Settlement",
     "takeaway-order": "Takeaway Order",
