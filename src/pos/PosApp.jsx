@@ -17,6 +17,9 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell
 } from "recharts";
+import EventReservationPage from "./EventReservationPage";
+import EventReservationReport from "./EventReservationReport";
+import GeneralInfoScreen from "./GeneralInfoScreen";
 
 /* ---------------------------------- THEME ---------------------------------- */
 const C = {
@@ -2944,7 +2947,11 @@ function MenuItemCard({ item, onAdd, rate }) {
   );
 }
 
-function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in" }) {
+function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", requireGeneralInfo = false }) {
+  // "Other Info" (General Information) is captured BEFORE the menu appears once a
+  // table is selected, and can be reopened any time from the order header.
+  const [generalInfo, setGeneralInfo] = useState(null);
+  const [showGeneralInfo, setShowGeneralInfo] = useState(requireGeneralInfo);
   const { notifyItemOrdered, notifyOrderClosed, notifyKotSent } = useOrderNotifications();
   const { saveOrder } = useOrderStore();
   const [orderToast, setOrderToast] = useState("");
@@ -5026,6 +5033,7 @@ function StoreRequestReportPage() {
 const REPORT_TABS = [
   { id: "shift-close", label: "Shift Close Report", icon: FileText },
   { id: "store-request", label: "Store Request Report", icon: ClipboardList },
+  { id: "event-reservation", label: "Event Reservation Report", icon: PartyPopper },
 ];
 
 function ReportsPage() {
@@ -5044,7 +5052,9 @@ function ReportsPage() {
           </button>
         ))}
       </div>
-      {tab === "shift-close" ? <ShiftCloseReportPage /> : <StoreRequestReportPage />}
+      {tab === "shift-close" && <ShiftCloseReportPage />}
+      {tab === "store-request" && <StoreRequestReportPage />}
+      {tab === "event-reservation" && <EventReservationReport />}
     </div>
   );
 }
@@ -5842,9 +5852,16 @@ function AppShell() {
             />
           )}
           {active === "event-order" && (
-            <EventOrderPage
-              onNewOrder={() => goToOffPremiseOrder("Event")}
-              onOpenOrder={(o) => goToOffPremiseOrder("Event", o)}
+            <EventReservationPage
+              onTakeOrder={(reservation) =>
+                goToOffPremiseOrder("Event", {
+                  id: `IRVEK-EV-${reservation.reservationNo}`,
+                  guest: reservation.guest,
+                  company: reservation.company,
+                  time: reservation.eventFrom,
+                  reservation,
+                })
+              }
             />
           )}
           {active === "inventory" && <StoreRequestPage />}
