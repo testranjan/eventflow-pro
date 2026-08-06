@@ -1,17 +1,4 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback, createContext, useContext } from "react";
-import imgCola from "../assets/menu/cola.jpg";
-import imgSalmonBento from "../assets/menu/salmon-bento.jpg";
-import imgKatsuDon from "../assets/menu/katsu-don.jpg";
-import imgDraftBeer from "../assets/menu/draft-beer.jpg";
-import imgSalmonSushi from "../assets/menu/salmon-sushi.jpg";
-import imgGiftCard from "../assets/menu/gift-card.jpg";
-import imgTeriyakiDon from "../assets/menu/teriyaki-don.jpg";
-import imgGyoza from "../assets/menu/gyoza.jpg";
-import imgMisoSoup from "../assets/menu/miso-soup.jpg";
-import imgGreenTea from "../assets/menu/green-tea.jpg";
-import imgOolongTea from "../assets/menu/oolong-tea.jpg";
-import imgHotSake from "../assets/menu/hot-sake.jpg";
-import imgHouseWine from "../assets/menu/house-wine.jpg";
 import {
   LayoutDashboard, ShoppingCart, Grid3x3, Receipt, Wallet, Users, Package,
   BarChart3, Monitor, Tag, UserCog, Clock, Settings, Menu, ChevronDown,
@@ -2674,19 +2661,19 @@ function BillingScreen({ orderType, billOfLabel, bill, onExit, onSettle, onOpenD
 const ORDER_CATEGORIES = ["All Categories", "Beverages", "Food", "Alcohol", "Merchandise"];
 
 const MENU_CATALOG = [
-  { id: "m1", name: "Coca-Cola 500ml", price: 350, emoji: "🥤", image: imgCola, category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m2", name: "Salmon Bento Box", price: 1200, emoji: "🍱", image: imgSalmonBento, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m3", name: "Chicken Katsu Don", price: 980, emoji: "🍛", image: imgKatsuDon, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m4", name: "Draft Beer 500ml", price: 600, emoji: "🍺", image: imgDraftBeer, category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
-  { id: "m5", name: "Salmon Sushi Set", price: 1450, emoji: "🍣", image: imgSalmonSushi, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m6", name: "Restaurant Gift Card", price: 5000, emoji: "🎁", image: imgGiftCard, category: "Merchandise", badge: "0%", tax: "Standard Tax Item", disabled: true },
-  { id: "m7", name: "Teriyaki Chicken Don", price: 980, emoji: "🍚", image: imgTeriyakiDon, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m8", name: "Gyoza (6 pcs)", price: 580, emoji: "🥟", image: imgGyoza, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m9", name: "Miso Soup", price: 280, emoji: "🍲", image: imgMisoSoup, category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m10", name: "Green Tea (Hot)", price: 300, emoji: "🍵", image: imgGreenTea, category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m11", name: "Oolong Tea Bottle", price: 380, emoji: "🧃", image: imgOolongTea, category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m12", name: "Hot Sake 180ml", price: 750, emoji: "🍶", image: imgHotSake, category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
-  { id: "m13", name: "House Wine Glass", price: 700, emoji: "🍷", image: imgHouseWine, category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
+  { id: "m1", name: "Coca-Cola 500ml", price: 350, emoji: "🥤", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m2", name: "Salmon Bento Box", price: 1200, emoji: "🍱", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m3", name: "Chicken Katsu Don", price: 980, emoji: "🍛", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m4", name: "Draft Beer 500ml", price: 600, emoji: "🍺", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
+  { id: "m5", name: "Salmon Sushi Set", price: 1450, emoji: "🍣", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m6", name: "Restaurant Gift Card", price: 5000, emoji: "🎁", category: "Merchandise", badge: "0%", tax: "Standard Tax Item", disabled: true },
+  { id: "m7", name: "Teriyaki Chicken Don", price: 980, emoji: "🍚", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m8", name: "Gyoza (6 pcs)", price: 580, emoji: "🥟", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m9", name: "Miso Soup", price: 280, emoji: "🍲", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m10", name: "Green Tea (Hot)", price: 300, emoji: "🍵", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m11", name: "Oolong Tea Bottle", price: 380, emoji: "🧃", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
+  { id: "m12", name: "Hot Sake 180ml", price: 750, emoji: "🍶", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
+  { id: "m13", name: "House Wine Glass", price: 700, emoji: "🍷", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
 ];
 
 /* ---------------------------------- DUAL TAX ENGINE (JP Dual Tax Edition) ----------------------------------
