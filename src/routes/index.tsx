@@ -1,24 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import PosApp from "@/pos/PosApp";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Upcoming POS — Restaurant & Event Order System" },
+      {
+        name: "description",
+        content:
+          "Restaurant POS with table ordering, event reservations, banquet bookings and an event reservation report.",
+      },
+      { property: "og:title", content: "Upcoming POS — Restaurant & Event Order System" },
+      {
+        property: "og:description",
+        content:
+          "Take orders, manage tables, book banquet events and run event reservation reports from one POS.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: PosApp,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
