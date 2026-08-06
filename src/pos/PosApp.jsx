@@ -3270,6 +3270,22 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
     </>
   );
 
+  if (showGeneralInfo) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-50" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+        <GeneralInfoScreen
+          table={table}
+          initial={generalInfo}
+          onCancel={() => (generalInfo ? setShowGeneralInfo(false) : onExit())}
+          onSave={(info) => {
+            setGeneralInfo(info);
+            setShowGeneralInfo(false);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-50" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {/* Top bar */}
@@ -3278,6 +3294,9 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <CalendarDays size={15} /> {new Date().toLocaleDateString("en-GB").split("/").reverse().join("/")}
         </div>
         <div className="ml-auto flex items-center gap-3 sm:gap-5 shrink-0 order-2 sm:order-3">
+          <button onClick={() => setShowGeneralInfo(true)} className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm" style={{ color: C.orange }}>
+            <Info size={15} /> <span className="hidden xs:inline">OTHER INFO</span>
+          </button>
           <button onClick={onExit} className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm" style={{ color: C.blue }}>
             <ArrowUpRight size={15} /> <span className="hidden xs:inline">DASHBOARD</span>
           </button>
@@ -3297,6 +3316,12 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <span className="px-3 py-1 rounded-full text-xs font-bold border" style={{ borderColor: C.green, color: C.green, background: "white" }}>
             Source: {table.id}
           </span>
+          {generalInfo && (
+            <span className="px-3 py-1 rounded-full text-xs font-bold border hidden sm:inline" style={{ borderColor: C.orange, color: C.orange, background: "white" }}>
+              {generalInfo.kot} · Cover {generalInfo.cover}
+              {generalInfo.attendant ? ` · ${generalInfo.attendant}` : ""}
+            </span>
+          )}
           <span className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ background: C.green }}>
             STANDARD
           </span>
@@ -5812,6 +5837,7 @@ function AppShell() {
       <TouchOrderScreen
         table={selectedTable}
         initialOrderType={selectedTable.orderType || "Dine-in"}
+        requireGeneralInfo={!selectedTable.orderType || selectedTable.orderType === "Dine-in"}
         onExit={() => {
           setSelectedTable(null);
           setActive("dashboard");
