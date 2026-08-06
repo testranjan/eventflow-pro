@@ -1,4 +1,5 @@
 declare module "@/pos/PosApp" {
-  const PosApp: () => JSX.Element;
+  import type { ComponentType } from "react";
+  const PosApp: ComponentType;
   export default PosApp;
 }
