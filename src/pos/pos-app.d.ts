@@ -1,5 +1,5 @@
 declare module "@/pos/PosApp" {
-  import type { ComponentType } from "react";
-  const PosApp: ComponentType;
+  import type { FunctionComponent } from "react";
+  const PosApp: FunctionComponent;
   export default PosApp;
 }
