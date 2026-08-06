@@ -20,6 +20,7 @@ import {
 import EventReservationPage from "./EventReservationPage";
 import EventReservationReport from "./EventReservationReport";
 import GeneralInfoScreen from "./GeneralInfoScreen";
+import CustomerOrderingPage from "./CustomerOrderingPage";
 
 /* ---------------------------------- THEME ---------------------------------- */
 const C = {
@@ -53,6 +54,7 @@ const NAV_ITEMS = [
   { id: "customers", label: "Customers", icon: Users },
   { id: "inventory", label: "Inventory", icon: Package },
   { id: "reports", label: "Reports", icon: BarChart3 },
+  { id: "customer-ordering", label: "Customer Ordering", icon: QrCode },
   { id: "kitchen", label: "Kitchen Display", icon: Monitor },
   { id: "promotions", label: "Promotions", icon: Tag },
   { id: "employees", label: "Employees", icon: UserCog },
@@ -5756,7 +5758,7 @@ function BillReprintPage() {
 /* ---------------------------------- APP ---------------------------------- */
 const HANDLED_PAGES = [
   "dashboard", "shift", "reports", "tables", "take-order", "orders", "settlement",
-  "takeaway-order", "delivery-order", "event-order", "inventory", "kitchen", "bill-reprint", "more",
+  "takeaway-order", "delivery-order", "event-order", "inventory", "kitchen", "bill-reprint", "customer-ordering", "more",
 ];
 
 // Order types that skip table assignment and hand off straight into the Touch Order screen.
@@ -5796,6 +5798,7 @@ function AppShell() {
     inventory: "Store Request",
     kitchen: "Kitchen Display",
     "bill-reprint": "Bill RePrint",
+    "customer-ordering": "Setup & Customer Ordering",
   };
 
   // Picking a table from the Table List (or from an Order row) jumps straight into Take Order for that table.
@@ -5892,6 +5895,7 @@ function AppShell() {
               }
             />
           )}
+          {active === "customer-ordering" && <CustomerOrderingPage />}
           {active === "inventory" && <StoreRequestPage />}
           {active === "bill-reprint" && <BillReprintPage />}
           {!HANDLED_PAGES.includes(active) && <Placeholder id={active} />}
