@@ -3,6 +3,7 @@ import { Info, Users, UserCircle2, Gift, Search, ChevronDown, Check, X } from "l
 import { EC } from "./eventData";
 
 const ATTENDANTS = [
+  { name: "Ranjan", role: "Logged-in user" },
   { name: "Annam Names", role: "Guest server" },
   { name: "Dorner Namer", role: "Recent servers" },
   { name: "Aannia Lata", role: "Guest Viss" },
@@ -35,11 +36,12 @@ function Toggle({ options, value, onChange, activeBg = "#0F172A", activeColor = 
  * "Other Info" / General Information step — shown right after a table is picked
  * (and reachable from the Touch Order screen) before the menu appears.
  */
-export default function GeneralInfoScreen({ table, initial, onCancel, onSave }) {
+export default function GeneralInfoScreen({ table, initial, currentUser = "", onCancel, onSave }) {
   const [charge, setCharge] = useState(initial?.charge || "Standard");
   const [service, setService] = useState(initial?.service || "Dine In");
-  const [cover, setCover] = useState(initial?.cover || "");
-  const [attendant, setAttendant] = useState(initial?.attendant || "");
+  // Cover defaults to 1 and the attendant to the logged-in user — both stay editable.
+  const [cover, setCover] = useState(initial?.cover || "1");
+  const [attendant, setAttendant] = useState(initial?.attendant || currentUser || "");
   const [company, setCompany] = useState(initial?.company || COMPANIES[0]);
   const [guest, setGuest] = useState(initial?.guest || "");
   const [remarks, setRemarks] = useState(initial?.remarks || "");
