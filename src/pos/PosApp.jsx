@@ -3104,8 +3104,17 @@ function MenuItemCard({ item, onAdd, rate }) {
 function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", requireGeneralInfo = false }) {
   // "Other Info" (General Information) is captured BEFORE the menu appears once a
   // table is selected, and can be reopened any time from the order header.
-  const [generalInfo, setGeneralInfo] = useState(null);
-  const [showGeneralInfo, setShowGeneralInfo] = useState(requireGeneralInfo);
+  const { getOrder, placeOrder, payOrder } = useTableOrders();
+  const promo = usePromotions();
+  const existingOrder = getOrder(table.id);
+  // Attendant defaults to the logged-in user and Cover defaults to 1 — no manual
+  // selection needed to start ordering; both stay editable from "Other Info".
+  const [generalInfo, setGeneralInfo] = useState(
+    existingOrder
+      ? { attendant: existingOrder.attendant, cover: String(existingOrder.cover), kot: existingOrder.id, remarks: existingOrder.notes }
+      : null
+  );
+  const [showGeneralInfo, setShowGeneralInfo] = useState(requireGeneralInfo && !existingOrder);
   const { notifyItemOrdered, notifyOrderClosed, notifyKotSent } = useOrderNotifications();
   const { saveOrder } = useOrderStore();
   const [orderToast, setOrderToast] = useState("");
@@ -3114,10 +3123,15 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
   const [orderType, setOrderType] = useState(initialOrderType);
   const [cartTab, setCartTab] = useState("Orders On Hold");
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState([
-    { id: "m2", name: "Salmon Bento Box", price: 1200, tax: "Reduced Tax Eligible", qty: 1, checked: true },
-    { id: "m4", name: "Draft Beer 500ml", price: 600, tax: "Standard Tax Item", qty: 1, checked: true },
-  ]);
+  // Reopening a table restores whatever was previously placed on it.
+  const [cart, setCart] = useState(() =>
+    existingOrder
+      ? existingOrder.items.map((i) => ({ ...i, checked: true }))
+      : [
+          { id: "m2", name: "Salmon Bento Box", price: 1200, tax: "Reduced Tax Eligible", qty: 1, checked: true },
+          { id: "m4", name: "Draft Beer 500ml", price: 600, tax: "Standard Tax Item", qty: 1, checked: true },
+        ]
+  );
 
   const items = MENU_CATALOG.filter((m) => {
     if (category !== "All Categories" && m.category !== category) return false;
@@ -3191,6 +3205,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
   const finalTotal = Math.max(0, grandTotal - discountAmount);
 
   const [showBilling, setShowBilling] = useState(false);
+  const [showPromoPicker, setShowPromoPicker] = useState(false);
   const BILL_OF_LABELS = { "Dine-in": "Dine In", Takeaway: "Take Away", Delivery: "Delivery", Event: "Event" };
 
   const openDiscountFrom = (from) => {
@@ -3220,29 +3235,51 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
     [table.id, finalTotal, subtotal, tax, discountAmount, cart]
   );
 
+  // Payment success → mark paid (consumes coupon + moves loyalty points), free the
+  // table, clear the active order, auto-close the summary and return to Table View.
   const handleSettlementConfirmed = () => {
     setShowSettlement(false);
+    setShowBilling(false);
+    payOrder(table.id, {
+      total: finalTotal,
+      discount: discountAmount,
+      promotionId: discount?.promotionId || null,
+      coupon: discount?.coupon || null,
+      pointsUsed: discount?.pointsUsed || 0,
+      customerId: discount?.customerId || null,
+    });
     notifyOrderClosed(table.id, finalTotal);
     setCart([]);
     setDiscount(null);
-    onExit();
+    onExit("tables");
   };
 
   // "Place Order" = save the running cart as an order (kitchen-sent) + notify with sound.
   const handlePlaceOrder = () => {
     if (cart.length === 0) return;
+    const lines = cart.map((c) => ({ ...c }));
     const saved = saveOrder({
       table: table.id,
       orderType,
-      items: cart.map((c) => ({ name: c.desc ? `${c.name} (${c.desc})` : c.name, qty: c.qty, price: c.price })),
+      items: lines.map((c) => ({ name: c.desc ? `${c.name} (${c.desc})` : c.name, qty: c.qty, price: c.price })),
+      subtotal,
+      tax,
+      total: finalTotal,
+    });
+    // Persist against the table itself so it survives navigation and a page refresh.
+    placeOrder(table.id, {
+      orderType,
+      items: lines,
+      notes: generalInfo?.remarks || "",
+      attendant: generalInfo?.attendant || CURRENT_USER.name,
+      cover: Number(generalInfo?.cover) || 1,
       subtotal,
       tax,
       total: finalTotal,
     });
     notifyKotSent(`${table.id} · ${orderType}`, saved.itemCount);
-    setOrderToast(`Order saved · ${saved.id} · ${saved.itemCount} items`);
+    setOrderToast(`Ordered · ${table.id} · ${saved.itemCount} items · ¥${finalTotal.toLocaleString()}`);
     setTimeout(() => setOrderToast(""), 2400);
-    setCart([]);
     setCartOpen(false);
   };
 
@@ -3386,6 +3423,15 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <span className="text-sm font-bold text-slate-600">GRAND TOTAL</span>
           <span className="text-lg font-extrabold text-slate-900">NPR {finalTotal.toLocaleString()}.00</span>
         </div>
+        {promo.enabled && (
+          <button
+            onClick={() => setShowPromoPicker(true)}
+            className="w-full mb-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border min-h-[44px]"
+            style={{ background: C.purpleLight, borderColor: "#E9D5FF", color: C.purple }}
+          >
+            <Tag size={16} /> Discount &amp; Loyalty
+          </button>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <button
             disabled={cart.length === 0}
@@ -3429,6 +3475,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
       <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-50" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
         <GeneralInfoScreen
           table={table}
+          currentUser={CURRENT_USER.name}
           initial={generalInfo}
           onCancel={() => (generalInfo ? setShowGeneralInfo(false) : onExit())}
           onSave={(info) => {
@@ -3589,6 +3636,13 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           onAdd={addItem}
         />
       )}
+
+      <PromotionPickerModal
+        open={showPromoPicker}
+        subtotal={grandTotal}
+        onClose={() => setShowPromoPicker(false)}
+        onApply={(d) => setDiscount({ ...d, reason: d.label })}
+      />
 
       {showSettlement && (
         <BillSettlementModal
