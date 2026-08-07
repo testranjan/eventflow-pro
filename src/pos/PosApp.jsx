@@ -2289,6 +2289,7 @@ function TableCard({ t, isMenuOpen, onToggleMenu, onAction }) {
               <>
                 <div>C: {t.covers}</div>
                 <div>T: {t.since}</div>
+                {t.order && <div className="font-bold" style={{ color: C.green }}>¥{Number(t.order.total).toLocaleString()}</div>}
               </>
             ) : null}
           </div>
@@ -2329,8 +2330,30 @@ function TableListPage({ onSelectTable }) {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
+  const { orders } = useTableOrders();
 
-  const filteredAreas = TABLE_AREAS.map((a) => ({
+  // A saved (placed) order always wins over the demo seed status: the table becomes
+  // Occupied and carries its live order total / time until payment frees it again.
+  const areas = useMemo(
+    () =>
+      TABLE_AREAS.map((a) => ({
+        ...a,
+        tables: a.tables.map((t) => {
+          const o = orders[t.id];
+          if (!o) return t;
+          return {
+            ...t,
+            status: "Occupied",
+            covers: o.cover,
+            since: o.createdTime,
+            order: o,
+          };
+        }),
+      })),
+    [orders]
+  );
+
+  const filteredAreas = areas.map((a) => ({
     ...a,
     tables: a.tables.filter((t) => {
       if (filter === "In Use" && t.status === "Vacant") return false;
