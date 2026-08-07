@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
-  Tag, Plus, X, Ticket, Award, Percent, Search, Trash2, Pencil, Check,
-  Sparkles, ChevronDown,
+  Tag, Plus, X, Ticket, Award, Search, Trash2, Pencil, Check, Sparkles,
 } from "lucide-react";
 import { usePromotions, OUTLETS, PROGRAM_TYPES, REWARD_TYPES, APPLIES_TO } from "./posStore";
 
