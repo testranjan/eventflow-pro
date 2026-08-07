@@ -21,6 +21,9 @@ import EventReservationPage from "./EventReservationPage";
 import EventReservationReport from "./EventReservationReport";
 import GeneralInfoScreen from "./GeneralInfoScreen";
 import CustomerOrderingPage from "./CustomerOrderingPage";
+import PromotionsPage, { PromotionPickerModal } from "./PromotionsPage";
+import SettingsPage from "./SettingsPage";
+import { PosDataProvider, useTableOrders, usePromotions, CURRENT_USER, OUTLETS } from "./posStore";
 
 /* ---------------------------------- THEME ---------------------------------- */
 const C = {
@@ -498,27 +501,64 @@ function Button({ children, variant = "primary", size = "md", className = "", ..
   );
 }
 
-/* ---------------------------------- TOP NAV ---------------------------------- */
-function TopNav({ onToggleSidebar }) {
+/* ---------------------------------- TOP NAV ----------------------------------
+   Responsive header: desktop keeps the full row (outlet, date, language), while
+   phones keep only the hamburger + outlet selector; date & language move into the
+   drawer. The header stays sticky on every breakpoint. */
+function OutletPicker({ outlet, setOutlet }) {
+  const [open, setOpen] = useState(false);
   return (
-    <header className="h-16 shrink-0 bg-white border-b border-slate-200 flex items-center gap-3 px-4 lg:px-6 sticky top-0 z-30">
+    <div className="relative min-w-0">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 hover:border-slate-300 min-h-[44px] max-w-[52vw] sm:max-w-none"
+      >
+        <Store size={16} className="text-slate-400 shrink-0" />
+        <span className="truncate font-medium">{outlet}</span>
+        <ChevronDown size={14} className="text-slate-400 shrink-0" />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+            {OUTLETS.map((o) => (
+              <button
+                key={o}
+                onClick={() => { setOutlet(o); setOpen(false); }}
+                className="w-full flex items-center gap-2 px-3.5 py-3 text-sm text-left hover:bg-slate-50 min-h-[44px]"
+                style={outlet === o ? { background: C.greenLight, color: "#166534", fontWeight: 600 } : {}}
+              >
+                <span className="flex-1 truncate">{o}</span>
+                {outlet === o && <Check size={14} color={C.green} />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function TopNav({ onToggleSidebar, onOpenDrawer, outlet, setOutlet }) {
+  return (
+    <header className="h-16 shrink-0 bg-white border-b border-slate-200 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 sticky top-0 z-30">
       <button
         onClick={onToggleSidebar}
         className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hidden lg:inline-flex"
       >
         <Menu size={20} />
       </button>
-      <div className="flex items-center gap-2 lg:hidden">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm" style={{ background: C.green }}>A</div>
-        <span className="font-extrabold tracking-tight text-slate-900">NEED<span style={{ color: C.green }}>POS</span></span>
-      </div>
+      <button
+        onClick={onOpenDrawer}
+        aria-label="Open menu"
+        className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600 min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
+      >
+        <Menu size={22} />
+      </button>
+
+      <OutletPicker outlet={outlet} setOutlet={setOutlet} />
 
       <div className="hidden lg:flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 cursor-pointer hover:border-slate-300">
-        <Store size={16} className="text-slate-400" />
-        All Outlets
-        <ChevronDown size={14} className="text-slate-400" />
-      </div>
-      <div className="hidden md:flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 cursor-pointer hover:border-slate-300">
         <CalendarDays size={16} className="text-slate-400" />
         21 Jun 2026, Sat
         <ChevronDown size={14} className="text-slate-400" />
@@ -530,25 +570,114 @@ function TopNav({ onToggleSidebar }) {
           <CircleDot size={10} fill="#16A34A" />
           Outlet Open
         </div>
-        <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500">
           <Wifi size={14} className="text-emerald-500" />
-          Online
+          <span className="hidden sm:inline">Online</span>
         </div>
         <NotificationBell />
-        <div className="flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-slate-200 cursor-pointer">
+        <div className="hidden sm:flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-slate-200 cursor-pointer">
           <img
             src="https://i.pravatar.cc/64?img=13"
             className="w-8 h-8 rounded-full object-cover"
             alt="avatar"
           />
           <div className="hidden lg:block leading-tight">
-            <div className="text-sm font-semibold text-slate-800">Ranjan</div>
-            <div className="text-xs text-slate-400">Admin</div>
+            <div className="text-sm font-semibold text-slate-800">{CURRENT_USER.name}</div>
+            <div className="text-xs text-slate-400">{CURRENT_USER.role}</div>
           </div>
           <ChevronDown size={14} className="hidden lg:block text-slate-400" />
         </div>
       </div>
     </header>
+  );
+}
+
+/* --------------------------- MOBILE DRAWER (hamburger) --------------------------- */
+function MobileDrawer({ open, onClose, active, setActive, outlet }) {
+  const { lang, setLang } = useLanguage();
+  const [langOpen, setLangOpen] = useState(false);
+  const current = LANG_OPTIONS.find((l) => l.id === lang) || LANG_OPTIONS[0];
+  if (!open) return null;
+  return (
+    <div className="lg:hidden fixed inset-0 z-[100]">
+      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
+      <aside
+        className="absolute inset-y-0 left-0 w-[82vw] max-w-[320px] bg-white flex flex-col shadow-2xl"
+        style={{ animation: "drawerIn .22s ease-out" }}
+      >
+        <style>{`@keyframes drawerIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
+        <div className="h-16 flex items-center gap-2 px-4 border-b border-slate-200 shrink-0">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm" style={{ background: C.green }}>A</div>
+          <span className="font-extrabold tracking-tight text-slate-900">NEED<span style={{ color: C.green }}>POS</span></span>
+          <button onClick={onClose} className="ml-auto p-2 rounded-lg hover:bg-slate-100 text-slate-500 min-w-[44px] min-h-[44px] flex items-center justify-center">
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = active === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActive(item.id); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium min-h-[44px] ${
+                  isActive ? "text-emerald-700" : "text-slate-600 hover:bg-slate-50"
+                }`}
+                style={isActive ? { background: C.greenLight } : {}}
+              >
+                <Icon size={18} className="shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+
+          <div className="border-t border-slate-200 mt-3 pt-3 space-y-2">
+            <div className="px-3">
+              <div className="text-xs font-semibold text-slate-400">Outlet</div>
+              <div className="text-sm font-semibold text-slate-800">{outlet}</div>
+            </div>
+            <div className="px-3">
+              <div className="text-xs font-semibold text-slate-400">Date</div>
+              <div className="text-sm font-semibold text-slate-800">21 Jun 2026</div>
+            </div>
+            <div className="px-3">
+              <div className="text-xs font-semibold text-slate-400 mb-1">Language</div>
+              <button
+                onClick={() => setLangOpen((o) => !o)}
+                className="w-full flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 min-h-[44px]"
+              >
+                <Globe size={16} className="text-slate-400" />
+                <span className="flex-1 text-left">{current.native}</span>
+                <ChevronDown size={14} className="text-slate-400" />
+              </button>
+              {langOpen && (
+                <div className="mt-1 border border-slate-200 rounded-xl overflow-hidden">
+                  {LANG_OPTIONS.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => { setLang(l.id); setLangOpen(false); }}
+                      className="w-full flex items-center gap-2 px-3.5 py-3 text-sm text-left hover:bg-slate-50 min-h-[44px]"
+                      style={lang === l.id ? { background: C.greenLight, color: "#166534", fontWeight: 600 } : {}}
+                    >
+                      <span className="flex-1">{l.native}</span>
+                      {lang === l.id && <Check size={14} color={C.green} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </nav>
+
+        <div className="border-t border-slate-200 p-3 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold min-h-[44px]" style={{ background: C.redLight, color: "#991B1B" }}>
+            <Lock size={16} /> Logout
+          </button>
+        </div>
+      </aside>
+    </div>
   );
 }
 
