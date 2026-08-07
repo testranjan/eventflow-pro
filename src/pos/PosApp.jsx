@@ -682,7 +682,7 @@ function MobileDrawer({ open, onClose, active, setActive, outlet }) {
 }
 
 /* ---------------------------------- SIDEBAR ---------------------------------- */
-function Sidebar({ collapsed, active, setActive }) {
+function Sidebar({ collapsed, active, setActive, promotionsEnabled = true }) {
   return (
     <aside
       className={`hidden lg:flex flex-col shrink-0 bg-white border-r border-slate-200 h-screen sticky top-0 transition-all duration-200 ${
@@ -699,7 +699,7 @@ function Sidebar({ collapsed, active, setActive }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((i) => promotionsEnabled || i.id !== "promotions").map((item) => {
           const Icon = item.icon;
           const isActive = active === item.id;
           return (
@@ -5964,7 +5964,8 @@ function BillReprintPage() {
 /* ---------------------------------- APP ---------------------------------- */
 const HANDLED_PAGES = [
   "dashboard", "shift", "reports", "tables", "take-order", "orders", "settlement",
-  "takeaway-order", "delivery-order", "event-order", "inventory", "kitchen", "bill-reprint", "customer-ordering", "more",
+  "takeaway-order", "delivery-order", "event-order", "inventory", "kitchen", "bill-reprint", "customer-ordering",
+  "promotions", "settings", "more",
 ];
 
 // Order types that skip table assignment and hand off straight into the Touch Order screen.
@@ -5978,7 +5979,9 @@ export default function App() {
     <LanguageProvider>
       <NotificationProvider>
         <OrderStoreProvider>
-          <AppShell />
+          <PosDataProvider>
+            <AppShell />
+          </PosDataProvider>
         </OrderStoreProvider>
       </NotificationProvider>
     </LanguageProvider>
@@ -5987,8 +5990,11 @@ export default function App() {
 
 function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [active, setActive] = useState("dashboard");
   const [selectedTable, setSelectedTable] = useState(null);
+  const [outlet, setOutlet] = useState(OUTLETS[0]);
+  const promo = usePromotions();
 
   const titleMap = {
     dashboard: "Dashboard",
@@ -6005,6 +6011,8 @@ function AppShell() {
     kitchen: "Kitchen Display",
     "bill-reprint": "Bill RePrint",
     "customer-ordering": "Setup & Customer Ordering",
+    promotions: "Discount & Loyalty",
+    settings: "Settings",
   };
 
   // Picking a table from the Table List (or from an Order row) jumps straight into Take Order for that table.
@@ -6049,9 +6057,9 @@ function AppShell() {
         table={selectedTable}
         initialOrderType={selectedTable.orderType || "Dine-in"}
         requireGeneralInfo={!selectedTable.orderType || selectedTable.orderType === "Dine-in"}
-        onExit={() => {
+        onExit={(target) => {
           setSelectedTable(null);
-          setActive("dashboard");
+          setActive(typeof target === "string" ? target : "dashboard");
         }}
       />
     );
@@ -6064,10 +6072,22 @@ function AppShell() {
         * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
       `}</style>
 
-      <Sidebar collapsed={collapsed} active={active} setActive={setActive} />
+      <Sidebar collapsed={collapsed} active={active} setActive={setActive} promotionsEnabled={promo.enabled} />
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        active={active}
+        setActive={setActive}
+        outlet={outlet}
+      />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <TopNav onToggleSidebar={() => setCollapsed((c) => !c)} />
+        <TopNav
+          onToggleSidebar={() => setCollapsed((c) => !c)}
+          onOpenDrawer={() => setDrawerOpen(true)}
+          outlet={outlet}
+          setOutlet={setOutlet}
+        />
         <main className="flex-1 px-4 sm:px-6 py-6 pb-24 lg:pb-6">
           {active === "dashboard" && <Dashboard setActive={setActive} />}
           {active === "shift" && <ShiftManagement />}
@@ -6102,12 +6122,14 @@ function AppShell() {
             />
           )}
           {active === "customer-ordering" && <CustomerOrderingPage />}
+          {active === "promotions" && <PromotionsPage />}
+          {active === "settings" && <SettingsPage onOpenPromotions={() => setActive("promotions")} />}
           {active === "inventory" && <StoreRequestPage />}
           {active === "bill-reprint" && <BillReprintPage />}
           {!HANDLED_PAGES.includes(active) && <Placeholder id={active} />}
           {active === "more" && (
             <div className="grid grid-cols-3 gap-3">
-              {NAV_ITEMS.filter(n => !["dashboard","orders","tables","shift"].includes(n.id)).map((n) => {
+              {NAV_ITEMS.filter(n => !["dashboard","orders","tables","shift"].includes(n.id) && (promo.enabled || n.id !== "promotions")).map((n) => {
                 const Icon = n.icon;
                 return (
                   <button key={n.id} onClick={() => setActive(n.id)} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center gap-2">
