@@ -13,7 +13,7 @@
 const PAD = 32; // characters per line at 80mm / 12px monospace
 
 const esc = (s) =>
-  String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
 
 const yen = (n) => `¥${Number(n || 0).toLocaleString("ja-JP")}`;
 
@@ -59,7 +59,8 @@ function sendToPrinter(html) {
   if (typeof document === "undefined") return;
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
-  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+  frame.style.cssText =
+    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
   document.body.appendChild(frame);
   const doc = frame.contentDocument;
   doc.open();
@@ -94,9 +95,13 @@ export function printKot({
   const lines = items
     .map((i) => {
       const { base, options } = splitOptions(i.name);
-      const opts = [...options, ...(i.desc ? String(i.desc).split(/\s*[,、]\s*/) : [])].filter(Boolean);
-      return `<div class="row b lg"><span>${esc(base)}</span><span>×${i.qty || 1}</span></div>` +
-        opts.map((o) => `<div class="opt">&gt;${esc(o)}</div>`).join("");
+      const opts = [...options, ...(i.desc ? String(i.desc).split(/\s*[,、]\s*/) : [])].filter(
+        Boolean,
+      );
+      return (
+        `<div class="row b lg"><span>${esc(base)}</span><span>×${i.qty || 1}</span></div>` +
+        opts.map((o) => `<div class="opt">&gt;${esc(o)}</div>`).join("")
+      );
     })
     .join('<div class="sp"></div>');
 
@@ -149,7 +154,10 @@ export function printBill({
     .join("");
 
   const rateRows = Object.entries(taxByRate)
-    .map(([rate, amt]) => `<div class="row"><span>（${esc(rate)}対象 消費税）</span><span>${yen(amt)}</span></div>`)
+    .map(
+      ([rate, amt]) =>
+        `<div class="row"><span>（${esc(rate)}対象 消費税）</span><span>${yen(amt)}</span></div>`,
+    )
     .join("");
 
   const body = `
