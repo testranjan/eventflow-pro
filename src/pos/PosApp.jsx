@@ -24,6 +24,7 @@ import CustomerOrderingPage from "./CustomerOrderingPage";
 import PromotionsPage, { PromotionPickerModal } from "./PromotionsPage";
 import SettingsPage from "./SettingsPage";
 import { PosDataProvider, useTableOrders, usePromotions, CURRENT_USER, OUTLETS } from "./posStore";
+import { printKot, printBill } from "./printSlips";
 
 /* ---------------------------------- THEME ---------------------------------- */
 const C = {
