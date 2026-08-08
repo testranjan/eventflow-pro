@@ -3639,7 +3639,18 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           </span>
           <span className="text-sm">NPR {finalTotal.toLocaleString()}.00</span>
         </button>
+        {promo.enabled && (
+          <button
+            onClick={() => setShowPromoPicker(true)}
+            aria-label="Discount & Loyalty"
+            className="shrink-0 flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 min-h-[44px] min-w-[44px] text-xs font-bold border"
+            style={{ background: C.purpleLight, borderColor: "#E9D5FF", color: C.purple }}
+          >
+            <Tag size={16} /> <span className="hidden sm:inline">Discount</span>
+          </button>
+        )}
       </div>
+
 
       {/* Mobile/Tablet: cart bottom-sheet drawer */}
       {cartOpen && (
