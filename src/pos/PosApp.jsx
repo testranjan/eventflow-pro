@@ -24,6 +24,7 @@ import CustomerOrderingPage from "./CustomerOrderingPage";
 import PromotionsPage, { PromotionPickerModal } from "./PromotionsPage";
 import SettingsPage from "./SettingsPage";
 import { PosDataProvider, useTableOrders, usePromotions, CURRENT_USER, OUTLETS } from "./posStore";
+import { printKot, printBill } from "./printSlips";
 
 /* ---------------------------------- THEME ---------------------------------- */
 const C = {
@@ -3235,11 +3236,31 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
     [table.id, finalTotal, subtotal, tax, discountAmount, cart]
   );
 
+  // Shared bill payload for the printed guest receipt (Japanese thermal format).
+  const buildBillSlip = (payment = {}) => ({
+    outlet: "UPCOMING RESTRO",
+    branch: "SHIBUYA MAIN",
+    slipNo: generalInfo?.kot || `${table.id}-${String(Date.now()).slice(-8)}`,
+    table: table.id,
+    cover: Number(generalInfo?.cover) || 1,
+    attendant: generalInfo?.attendant || CURRENT_USER.name,
+    items: cart.map((c) => ({ name: c.desc ? `${c.name} (${c.desc})` : c.name, qty: c.qty, price: c.price })),
+    subtotal,
+    tax,
+    taxByRate: taxBreakdown.byRate,
+    discount: discountAmount,
+    total: finalTotal,
+    paid: payment.totalPaid || finalTotal,
+    change: payment.change || 0,
+    method: payment.method || "",
+  });
+
   // Payment success → mark paid (consumes coupon + moves loyalty points), free the
-  // table, clear the active order, auto-close the summary and return to Table View.
-  const handleSettlementConfirmed = () => {
+  // table, clear the active order, print the bill and return to Table View.
+  const handleSettlementConfirmed = (payment = {}) => {
     setShowSettlement(false);
     setShowBilling(false);
+    printBill(buildBillSlip(payment));
     payOrder(table.id, {
       total: finalTotal,
       discount: discountAmount,
@@ -3277,11 +3298,23 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
       tax,
       total: finalTotal,
     });
+    // Kitchen ticket goes to the printer as soon as the order is sent.
+    printKot({
+      outlet: "UPCOMING RESTRO — SHIBUYA MAIN",
+      kot: generalInfo?.kot || saved.id || `${table.id}-${String(Date.now()).slice(-5)}`,
+      table: table.id,
+      orderType,
+      cover: Number(generalInfo?.cover) || 1,
+      attendant: generalInfo?.attendant || CURRENT_USER.name,
+      items: lines.map((c) => ({ name: c.name, desc: c.desc, qty: c.qty })),
+      notes: generalInfo?.remarks || "",
+    });
     notifyKotSent(`${table.id} · ${orderType}`, saved.itemCount);
-    setOrderToast(`Ordered · ${table.id} · ${saved.itemCount} items · ¥${finalTotal.toLocaleString()}`);
+    setOrderToast(`Ordered · KOT printed · ${saved.itemCount} items · ¥${finalTotal.toLocaleString()}`);
     setTimeout(() => setOrderToast(""), 2400);
     setCartOpen(false);
   };
+
 
   const handleHoldOrder = () => {
     if (cart.length === 0) return;
@@ -3606,7 +3639,18 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           </span>
           <span className="text-sm">NPR {finalTotal.toLocaleString()}.00</span>
         </button>
+        {promo.enabled && (
+          <button
+            onClick={() => setShowPromoPicker(true)}
+            aria-label="Discount & Loyalty"
+            className="shrink-0 flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 min-h-[44px] min-w-[44px] text-xs font-bold border"
+            style={{ background: C.purpleLight, borderColor: "#E9D5FF", color: C.purple }}
+          >
+            <Tag size={16} /> <span className="hidden sm:inline">Discount</span>
+          </button>
+        )}
       </div>
+
 
       {/* Mobile/Tablet: cart bottom-sheet drawer */}
       {cartOpen && (
