@@ -305,54 +305,35 @@ function NotificationBell() {
    dictionary below is applied to rendered text (and placeholders / titles) by a small
    translation layer, so switching to 日本語 localises every screen at once and switching
    back to English restores the originals. */
-const JA_DICT = {
-  // Navigation
-  "Dashboard": "ダッシュボード", "Self Service / Fastfood": "セルフサービス／ファストフード", "Tables": "テーブル", "Table List": "テーブル一覧",
-  "Orders": "注文", "Settlement": "精算", "Customers": "顧客", "Inventory": "在庫", "Reports": "レポート",
-  "Kitchen Display": "キッチンディスプレイ", "Promotions": "プロモーション", "Employees": "従業員",
-  "Shift Management": "シフト管理", "Bill RePrint": "伝票再印刷", "Settings": "設定", "Home": "ホーム",
-  "Shift": "シフト", "More": "その他", "Takeaway Order": "テイクアウト注文", "Delivery Order": "デリバリー注文",
-  "Event Order": "イベント注文", "Store Request": "店舗申請", "Bill Settlement": "会計精算",
-  // Top bar
-  "All Outlets": "全店舗", "English": "English", "日本語": "日本語", "Language": "言語",
-  "Outlet Open": "営業中", "Online": "オンライン", "Admin": "管理者", "Main Outlet": "本店",
-  "Cashier:": "レジ担当:", "Shift:": "シフト:", "Morning": "午前",
-  // Notifications
-  "Order Notifications": "注文通知", "Sound On": "音オン", "Sound Off": "音オフ", "Clear": "クリア",
-  "No order activity yet. Add an item or close an order.": "注文の動きはまだありません。商品を追加するか注文を締めてください。",
-  "Added to the running order": "進行中の注文に追加しました", "Bill settled": "会計済み",
-  "Order sent to kitchen": "注文をキッチンに送信しました", "Order saved": "注文を保存しました",
-  // Dashboard
-  "Quick Actions": "クイック操作", "Today's Business": "本日の売上", "Restaurant Status": "店舗ステータス",
-  "Sales Overview": "売上概況", "Top 5 Selling Items": "売上トップ5商品", "Alerts": "アラート",
-  "Recent Activity": "最近の活動", "View All": "すべて表示", "View More": "もっと見る",
-  "From Main Outlet": "本店より", "Today": "今日", "Yesterday": "昨日", "This Week": "今週", "This Month": "今月",
-  "Create new order": "新規注文を作成", "Settle order": "注文を精算", "No table assigned": "テーブル未割当",
-  "Live kitchen tickets": "キッチン伝票（リアルタイム）", "Stock overview": "在庫概要",
-  "Table overview": "テーブル概要", "Banquets & functions": "宴会・催事",
-  "Total": "合計", "Qty": "数量", "Amount": "金額", "Status": "ステータス", "Time": "時刻",
-  "Table": "テーブル", "Guest": "お客様", "Items": "商品", "Print": "印刷", "Close": "閉じる",
-  "Apply": "適用", "Skip": "スキップ", "Save": "保存", "Reset": "リセット", "Export": "エクスポート",
-  "Available": "空席", "Reserved": "予約済み", "Billed": "請求済み", "Order put on hold": "注文を保留しました",
-  "Vacant Tables": "空きテーブル", "Search items": "商品を検索", "Order Type": "注文タイプ",
-  "Total Sales": "総売上", "Covers": "客数", "APC": "客単価", "Available Tables": "空きテーブル",
-  "Occupied Tables": "使用中テーブル", "Running Orders": "進行中の注文", "Invoices Generated": "発行済み請求書",
-  "Reserved Tables": "予約テーブル", "Pending Settlement": "未精算", "Low Stock": "在庫不足",
-  "Kitchen Delay": "キッチン遅延", "Shift Not Closed": "シフト未締め", "Outlet Not Open": "店舗未開店",
-  "Occupied": "使用中", "Completed": "完了", "New": "新規", "Updated": "更新", "New Customer": "新規顧客",
-  "Inventory Update": "在庫更新",
-  // Touch order / cart
-  "Place Order": "注文確定", "Hold": "保留", "Billing": "会計", "Pay Now": "支払う",
-  "Orders On Hold": "保留中の注文", "Ordered Items": "注文済み商品", "View All Orders": "すべての注文",
-  "All Categories": "すべてのカテゴリー", "Search": "検索", "GRAND TOTAL": "合計金額",
-  "Sub Total": "小計", "Consumption Tax": "消費税", "Discount": "割引", "Dine-in": "店内", "Dine In": "店内",
-  "Takeaway": "テイクアウト", "Delivery": "デリバリー", "Event": "イベント", "DASHBOARD": "ダッシュボード",
-  "ADMINISTRATOR": "管理者", "Vacant": "空席", "Confirm": "確定", "Cancel": "キャンセル", "Save Changes": "変更を保存",
-  "Settle": "精算", "Settled": "精算済み", "Print Bill": "伝票印刷", "Settle Bill": "会計する",
-  "Settle & Print": "精算して印刷", "New Order": "新規注文", "Bill List": "伝票一覧", "Outlet": "店舗",
-  "Reprint Of": "再印刷対象", "Actions": "操作", "View Bill": "伝票を見る", "RePrint Bill": "伝票を再印刷",
-  "Printed": "印刷済み", "Not Printed": "未印刷", "Custom Range": "期間指定", "Order On": "注文日時",
-};
+import { JA_DICT } from "./jaDict";
+
+/* Case-insensitive lookup table so "SETTLE", "Settle" and "settle" all match. */
+const JA_LOOKUP = (() => {
+  const m = new Map();
+  Object.entries(JA_DICT).forEach(([k, v]) => {
+    const key = k.trim().toLowerCase();
+    if (!m.has(key)) m.set(key, v);
+  });
+  return m;
+})();
+
+/* Strips wrapping punctuation ("Settle:", "Search…", "Name *") before lookup and
+   restores it afterwards, so decorated labels still translate. */
+function jaFor(raw) {
+  const trimmed = String(raw).trim();
+  if (!trimmed || /^[\d\s\W]+$/.test(trimmed)) return null;
+  if (/[぀-ヿ一-鿿]/.test(trimmed)) return null; // already Japanese
+  const direct = JA_LOOKUP.get(trimmed.toLowerCase());
+  if (direct) return direct;
+  const m = trimmed.match(/^([^A-Za-z]*)([\s\S]*?)([^A-Za-z0-9)%]*)$/);
+  if (!m) return null;
+  const [, lead, core, tail] = m;
+  if (!core) return null;
+  const hit = JA_LOOKUP.get(core.trim().toLowerCase());
+  return hit ? `${lead}${hit}${tail}` : null;
+}
+
+const TRANSLATABLE_ATTRS = ["placeholder", "title", "aria-label", "alt"];
 
 const LangCtx = createContext({ lang: "en", setLang: () => {} });
 export function useLanguage() { return useContext(LangCtx); }
@@ -363,16 +344,40 @@ function LanguageProvider({ children }) {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const originals = new Map();
+    const attrOriginals = new Map();
 
     const translateNode = (node) => {
       if (node.nodeType !== 3) return;
       const raw = node.nodeValue;
       if (!raw || !raw.trim()) return;
+      const parent = node.parentElement;
+      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return;
       const key = raw.trim();
-      const ja = JA_DICT[key];
+      const ja = jaFor(key);
       if (!ja || ja === key) return;
       if (!originals.has(node)) originals.set(node, raw);
       node.nodeValue = raw.replace(key, ja);
+    };
+
+    const translateAttrs = (el) => {
+      if (!el || el.nodeType !== 1 || !el.getAttribute) return;
+      TRANSLATABLE_ATTRS.forEach((attr) => {
+        const val = el.getAttribute(attr);
+        if (!val || !val.trim()) return;
+        const ja = jaFor(val);
+        if (!ja || ja === val) return;
+        const store = attrOriginals.get(el) || {};
+        if (!(attr in store)) { store[attr] = val; attrOriginals.set(el, store); }
+        el.setAttribute(attr, ja);
+      });
+      if (el.tagName === "INPUT" && /^(button|submit|reset)$/i.test(el.type || "") && el.value) {
+        const ja = jaFor(el.value);
+        if (ja && ja !== el.value) {
+          const store = attrOriginals.get(el) || {};
+          if (!("value" in store)) { store.value = el.value; attrOriginals.set(el, store); }
+          el.value = ja;
+        }
+      }
     };
 
     const walk = (root) => {
@@ -380,8 +385,8 @@ function LanguageProvider({ children }) {
       if (root.nodeType === 3) return translateNode(root);
       if (root.nodeType !== 1) return;
       if (root.tagName === "SCRIPT" || root.tagName === "STYLE") return;
-      const ph = root.getAttribute && root.getAttribute("placeholder");
-      if (ph && JA_DICT[ph.trim()]) root.setAttribute("placeholder", JA_DICT[ph.trim()]);
+      translateAttrs(root);
+      root.querySelectorAll && root.querySelectorAll("*").forEach(translateAttrs);
       const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       let n;
       while ((n = tw.nextNode())) translateNode(n);
@@ -397,15 +402,31 @@ function LanguageProvider({ children }) {
       records.forEach((r) => {
         r.addedNodes.forEach(walk);
         if (r.type === "characterData") translateNode(r.target);
+        if (r.type === "attributes" && r.target) translateAttrs(r.target);
       });
     });
-    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    obs.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: TRANSLATABLE_ATTRS,
+    });
 
     return () => {
       obs.disconnect();
       originals.forEach((value, node) => { try { node.nodeValue = value; } catch { /* detached */ } });
+      attrOriginals.forEach((store, el) => {
+        try {
+          Object.entries(store).forEach(([attr, value]) => {
+            if (attr === "value") el.value = value;
+            else el.setAttribute(attr, value);
+          });
+        } catch { /* detached */ }
+      });
     };
   }, [lang]);
+
 
   const value = useMemo(() => ({ lang, setLang }), [lang]);
   return <LangCtx.Provider value={value}>{children}</LangCtx.Provider>;
