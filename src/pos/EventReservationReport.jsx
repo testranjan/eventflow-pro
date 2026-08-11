@@ -63,7 +63,7 @@ export default function EventReservationReport() {
         if (status !== "ALL" && r.status !== status) return false;
         if (fn !== "ALL" && r.functionType !== fn) return false;
         if (exec !== "ALL" && r.salesExecutive !== exec) return false;
-        if (search && ![r.guest, r.company, r.reservationNo].some((v) => (v || "").toLowerCase().includes(search.toLowerCase()))) return false;
+        if (search && ![r.guest, r.company, r.reservationNo, r.barcode].some((v) => (v || "").toLowerCase().includes(search.toLowerCase()))) return false;
         return true;
       }),
     [from, to, hall, status, fn, exec, search]
@@ -159,7 +159,7 @@ export default function EventReservationReport() {
           <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
             <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2">
               <Search size={14} className="text-slate-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search guest / company / reservation #" className="text-sm outline-none w-56" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search guest / company / reservation # / barcode" className="text-sm outline-none w-56" />
             </div>
             <span className="text-xs text-slate-400">{rows.length} record(s)</span>
           </div>
