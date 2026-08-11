@@ -50,8 +50,8 @@ export default function GeneralInfoScreen({ table, initial, currentUser = "", on
   const save = () => onSave({ charge, service, cover, attendant, company, guest, remarks, kot });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+    <div className="min-h-screen h-full bg-slate-50 flex flex-col">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 short:py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-start gap-3 mb-6">
             <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: EC.blueLight }}>
@@ -153,17 +153,17 @@ export default function GeneralInfoScreen({ table, initial, currentUser = "", on
         </div>
       </div>
 
-      <div className="sticky bottom-0 border-t border-slate-200 bg-white px-4 sm:px-8 py-4">
+      <div className="sticky bottom-0 border-t border-slate-200 bg-white px-4 sm:px-8 py-4 short:py-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
           <button
             onClick={save}
             disabled={!cover}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-4 text-base font-bold text-white disabled:opacity-40"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-4 short:py-3 text-base font-bold text-white disabled:opacity-40"
             style={{ background: EC.green }}
           >
             <Check size={18} /> [ Save &amp; Continue ]
           </button>
-          <button onClick={onCancel} className="sm:w-48 inline-flex items-center justify-center gap-2 rounded-xl py-4 text-base font-bold bg-slate-200 text-slate-600">
+          <button onClick={onCancel} className="sm:w-48 inline-flex items-center justify-center gap-2 rounded-xl py-4 short:py-3 text-base font-bold bg-slate-200 text-slate-600">
             <X size={18} /> [ Cancel ]
           </button>
         </div>

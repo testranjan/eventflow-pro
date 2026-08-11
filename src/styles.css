@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Short viewports (e.g. 1080x810 landscape tablets) — compact vertical rhythm. */
+@custom-variant short (@media (max-height: 860px));
+@custom-variant tiny (@media (max-height: 700px));
+
 /*
  * Design system definition.
  *

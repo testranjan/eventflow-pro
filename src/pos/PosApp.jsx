@@ -3450,7 +3450,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
         ))}
       </div>
 
-      <div className="shrink-0 border-t border-slate-100 px-4 sm:px-5 pt-4 pb-4 sm:pb-5">
+      <div className="shrink-0 border-t border-slate-100 px-4 sm:px-5 pt-4 pb-4 sm:pb-5 short:pt-2.5 short:pb-2.5 max-h-[55vh] overflow-y-auto">
         <div className="flex justify-between text-sm text-slate-500 mb-1.5">
           <span>Subtotal</span><span className="font-semibold text-slate-700">NPR {subtotal.toLocaleString()}.00</span>
         </div>
@@ -3473,24 +3473,25 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
             <span className="font-semibold">-NPR {discountAmount.toLocaleString()}.00</span>
           </div>
         )}
-        <div className="flex justify-between items-center rounded-xl bg-slate-100 px-3.5 py-3 mb-4">
+        <div className="flex justify-between items-center rounded-xl bg-slate-100 px-3.5 py-3 mb-4 short:py-2 short:mb-2">
           <span className="text-sm font-bold text-slate-600">GRAND TOTAL</span>
-          <span className="text-lg font-extrabold text-slate-900">NPR {finalTotal.toLocaleString()}.00</span>
+          <span className="text-lg font-extrabold text-slate-900 short:text-base">NPR {finalTotal.toLocaleString()}.00</span>
         </div>
         {promo.enabled && (
           <button
             onClick={() => setShowPromoPicker(true)}
-            className="w-full mb-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border min-h-[44px]"
+            className="w-full mb-2 flex items-center justify-center gap-2 py-3 short:py-2 rounded-xl text-sm font-bold border min-h-[44px]"
             style={{ background: C.purpleLight, borderColor: "#E9D5FF", color: C.purple }}
           >
             <Tag size={16} /> Discount &amp; Loyalty
           </button>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
           <button
             disabled={cart.length === 0}
             onClick={() => setShowSettlement(true)}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: "#4F46E5" }}
           >
             <CreditCard size={16} /> Pay Now
@@ -3498,7 +3499,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={() => setShowBilling(true)}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.greenLight, borderColor: "#BBF7D0", color: "#15803D" }}
           >
             <Receipt size={16} /> Billing
@@ -3506,7 +3507,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={handleHoldOrder}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.orangeLight, borderColor: "#FDE68A", color: "#B45309" }}
           >
             <PauseCircle size={16} /> Hold
@@ -3514,7 +3515,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={handlePlaceOrder}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.green }}
           >
             <CheckCircle2 size={16} /> Place Order
@@ -3566,7 +3567,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
       </div>
 
       {/* Badges row */}
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 pt-3 sm:pt-4 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 pt-3 sm:pt-4 pb-2 short:pt-2 short:pb-1.5">
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full text-xs font-bold border" style={{ borderColor: C.green, color: C.green, background: "white" }}>
             Source: {table.id}
@@ -3622,13 +3623,14 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
 
             <div className="flex-1 min-w-0 min-h-0 flex flex-col">
               <div className="text-xs font-bold text-slate-400 tracking-wide mb-2.5 sm:mb-3 hidden md:block shrink-0">ITEMS</div>
-              <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 sm:pr-1">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 sm:pr-1 pb-2">
                 <div
-                  className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:h-full"
+                  className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
                   style={{
-                    gridAutoRows: "minmax(140px, min(300px, calc((100% - 2rem) / 3)))",
+                    gridAutoRows: "minmax(150px, auto)",
                   }}
                 >
+
                   {items.map((item) => (
                     <MenuItemCard key={item.id} item={item} onAdd={openItem} rate={getTaxRate(item.tax, orderType)} />
                   ))}
