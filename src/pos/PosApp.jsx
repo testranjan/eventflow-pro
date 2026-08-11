@@ -3566,7 +3566,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
       </div>
 
       {/* Badges row */}
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 pt-3 sm:pt-4 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 pt-3 sm:pt-4 pb-2 short:pt-2 short:pb-1.5">
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full text-xs font-bold border" style={{ borderColor: C.green, color: C.green, background: "white" }}>
             Source: {table.id}
