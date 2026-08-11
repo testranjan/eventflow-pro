@@ -28,12 +28,12 @@ const ALLERGENS = [
 ];
 
 const SEED_ITEMS = [
-  { id: 1, emoji: "🍣", price: 850, cat: "Sushi", allergens: ["fish", "soy"], names: { JP: "サーモン寿司", EN: "Salmon Sushi", CN: "三文鱼寿司", KR: "연어 초밥" } },
-  { id: 2, emoji: "🍜", price: 1200, cat: "Ramen", allergens: ["egg", "wheat", "soy"], names: { JP: "醤油ラーメン", EN: "Shoyu Ramen", CN: "酱油拉面", KR: "쇼유 라멘" } },
-  { id: 3, emoji: "🍲", price: 250, cat: "Soup", allergens: ["soy"], names: { JP: "味噌汁", EN: "Miso Soup", CN: "味噌汤", KR: "미소 된장국" } },
-  { id: 4, emoji: "🍵", price: 300, cat: "Drink", allergens: [], names: { JP: "緑茶", EN: "Green Tea", CN: "绿茶", KR: "녹차" } },
-  { id: 5, emoji: "🍤", price: 980, cat: "Sushi", allergens: ["shrimp", "wheat"], names: { JP: "海老天ぷら", EN: "Ebi Tempura", CN: "炸虾天妇罗", KR: "새우 튀김" } },
-  { id: 6, emoji: "🍰", price: 620, cat: "Dessert", allergens: ["egg", "milk", "wheat"], names: { JP: "抹茶ケーキ", EN: "Matcha Cake", CN: "抹茶蛋糕", KR: "말차 케이크" } },
+  { id: 1, barcode: "4901000010013", emoji: "🍣", price: 850, cat: "Sushi", allergens: ["fish", "soy"], names: { JP: "サーモン寿司", EN: "Salmon Sushi", CN: "三文鱼寿司", KR: "연어 초밥" } },
+  { id: 2, barcode: "4901000020020", emoji: "🍜", price: 1200, cat: "Ramen", allergens: ["egg", "wheat", "soy"], names: { JP: "醤油ラーメン", EN: "Shoyu Ramen", CN: "酱油拉面", KR: "쇼유 라멘" } },
+  { id: 3, barcode: "4901000030037", emoji: "🍲", price: 250, cat: "Soup", allergens: ["soy"], names: { JP: "味噌汁", EN: "Miso Soup", CN: "味噌汤", KR: "미소 된장국" } },
+  { id: 4, barcode: "4901000040044", emoji: "🍵", price: 300, cat: "Drink", allergens: [], names: { JP: "緑茶", EN: "Green Tea", CN: "绿茶", KR: "녹차" } },
+  { id: 5, barcode: "4901000050051", emoji: "🍤", price: 980, cat: "Sushi", allergens: ["shrimp", "wheat"], names: { JP: "海老天ぷら", EN: "Ebi Tempura", CN: "炸虾天妇罗", KR: "새우 튀김" } },
+  { id: 6, barcode: "4901000060068", emoji: "🍰", price: 620, cat: "Dessert", allergens: ["egg", "milk", "wheat"], names: { JP: "抹茶ケーキ", EN: "Matcha Cake", CN: "抹茶蛋糕", KR: "말차 케이크" } },
 ];
 
 const TABLES = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
@@ -144,7 +144,9 @@ function MenuTab({ items, setItems, cfg }) {
   const [cat, setCat] = useState("All");
   const cats = ["All", ...Array.from(new Set(items.map((i) => i.cat)))];
   const rows = items.filter(
-    (i) => (cat === "All" || i.cat === cat) && Object.values(i.names).join(" ").toLowerCase().includes(q.toLowerCase())
+    (i) =>
+      (cat === "All" || i.cat === cat) &&
+      `${Object.values(i.names).join(" ")} ${i.barcode || ""}`.toLowerCase().includes(q.trim().toLowerCase())
   );
 
   const edit = (id, patch) => setItems((list) => list.map((i) => (i.id === id ? { ...i, ...patch } : i)));
@@ -167,7 +169,7 @@ function MenuTab({ items, setItems, cfg }) {
           <div className="flex gap-2">
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input className={`${inputCls} pl-8 w-44`} placeholder="Search item…" value={q} onChange={(e) => setQ(e.target.value)} />
+              <input className={`${inputCls} pl-8 w-44`} placeholder="Search item / barcode…" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
           </div>
         }
@@ -183,6 +185,7 @@ function MenuTab({ items, setItems, cfg }) {
             <tr className="text-white text-xs uppercase tracking-wide" style={{ background: "#0F5C7A" }}>
               <th className="text-left px-3 py-3 rounded-l-lg">Item</th>
               {LANGS.map((l) => <th key={l.code} className="text-left px-3 py-3">{l.flag} {l.code}</th>)}
+              <th className="text-left px-3 py-3">Barcode</th>
               <th className="text-right px-3 py-3">Price</th>
               <th className="text-left px-3 py-3 rounded-r-lg">Allergens</th>
             </tr>
@@ -205,6 +208,14 @@ function MenuTab({ items, setItems, cfg }) {
                     />
                   </td>
                 ))}
+                <td className="px-3 py-3">
+                  <input
+                    className="w-36 border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-mono outline-none focus:border-slate-400"
+                    value={it.barcode || ""}
+                    placeholder="Barcode"
+                    onChange={(e) => edit(it.id, { barcode: e.target.value.replace(/[^0-9]/g, "") })}
+                  />
+                </td>
                 <td className="px-3 py-3 text-right">
                   <div className="inline-flex items-center gap-1">
                     <span className="text-slate-400 text-xs">{cfg.currency}</span>

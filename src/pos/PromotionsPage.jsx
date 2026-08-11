@@ -250,7 +250,7 @@ function CouponDialog({ open, onClose, onGenerate }) {
         </div>
         {mode === "Selected Customers" && (
           <Field title="Customer">
-            <input className={input} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Search customer…" />
+            <input className={input} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Search customer / card barcode…" />
           </Field>
         )}
         <Field title="Quantity">
@@ -452,7 +452,14 @@ export default function PromotionsPage() {
   const [editor, setEditor] = useState({ open: false, program: null });
 
   const programs = useMemo(
-    () => promo.programs.filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase())),
+    () =>
+      promo.programs.filter(
+        (p) =>
+          !search ||
+          `${p.name} ${p.code || ""} ${p.barcode || ""} ${(p.coupons || []).map((c) => c.code || c).join(" ")}`
+            .toLowerCase()
+            .includes(search.trim().toLowerCase())
+      ),
     [promo.programs, search]
   );
 
@@ -500,7 +507,7 @@ export default function PromotionsPage() {
         <>
           <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-white mb-4 max-w-sm">
             <Search size={15} className="text-slate-400 shrink-0" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search program…" className="text-sm outline-none w-full min-h-[36px]" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search program / coupon / barcode…" className="text-sm outline-none w-full min-h-[36px]" />
           </div>
 
           {/* Cards on phones */}
