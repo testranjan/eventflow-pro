@@ -208,7 +208,7 @@ export default function EventReservationPage({ onTakeOrder }) {
     if (status !== "All" && r.status !== status) return false;
     if (!search) return true;
     const q = search.toLowerCase();
-    return [r.guest, r.company, r.hall, r.reservationNo].some((v) => (v || "").toLowerCase().includes(q));
+    return [r.guest, r.company, r.hall, r.reservationNo, r.barcode].some((v) => (v || "").toLowerCase().includes(q));
   });
 
   const upsert = (rec) => setRows((p) => (p.some((r) => r.id === rec.id) ? p.map((r) => (r.id === rec.id ? rec : r)) : [rec, ...p]));
@@ -244,7 +244,7 @@ export default function EventReservationPage({ onTakeOrder }) {
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-white">
             <Search size={15} className="text-slate-400" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search guest, hall, company…" className="text-sm outline-none w-40 sm:w-56 placeholder:text-slate-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search guest, hall, company, barcode…" className="text-sm outline-none w-40 sm:w-56 placeholder:text-slate-400" />
           </div>
           <select className={`${inputCls} w-auto`} value={status} onChange={(e) => setStatus(e.target.value)}>
             {["All", ...BOOKING_STATUS].map((s) => <option key={s}>{s}</option>)}
