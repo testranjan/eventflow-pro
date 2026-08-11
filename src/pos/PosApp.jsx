@@ -2379,7 +2379,11 @@ function TableListPage({ onSelectTable }) {
     ...a,
     tables: a.tables.filter((t) => {
       if (filter === "In Use" && t.status === "Vacant") return false;
-      if (search && !t.id.toLowerCase().includes(search.toLowerCase()) && !a.area.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search) {
+        const q = search.trim().toLowerCase();
+        const hay = `${t.id} ${a.area} ${t.barcode || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     }),
   })).filter((a) => a.tables.length > 0);
@@ -2420,7 +2424,7 @@ function TableListPage({ onSelectTable }) {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search Table/Area..."
+              placeholder="Search Table / Area / Barcode..."
               className="text-sm outline-none w-36 sm:w-44 placeholder:text-slate-400"
             />
           </div>
@@ -2840,19 +2844,19 @@ function BillingScreen({ orderType, billOfLabel, bill, onExit, onSettle, onOpenD
 const ORDER_CATEGORIES = ["All Categories", "Beverages", "Food", "Alcohol", "Merchandise"];
 
 const MENU_CATALOG = [
-  { id: "m1", name: "Coca-Cola 500ml", price: 350, emoji: "🥤", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m2", name: "Salmon Bento Box", price: 1200, emoji: "🍱", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m3", name: "Chicken Katsu Don", price: 980, emoji: "🍛", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m4", name: "Draft Beer 500ml", price: 600, emoji: "🍺", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
-  { id: "m5", name: "Salmon Sushi Set", price: 1450, emoji: "🍣", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m6", name: "Restaurant Gift Card", price: 5000, emoji: "🎁", category: "Merchandise", badge: "0%", tax: "Standard Tax Item", disabled: true },
-  { id: "m7", name: "Teriyaki Chicken Don", price: 980, emoji: "🍚", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m8", name: "Gyoza (6 pcs)", price: 580, emoji: "🥟", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m9", name: "Miso Soup", price: 280, emoji: "🍲", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m10", name: "Green Tea (Hot)", price: 300, emoji: "🍵", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m11", name: "Oolong Tea Bottle", price: 380, emoji: "🧃", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" },
-  { id: "m12", name: "Hot Sake 180ml", price: 750, emoji: "🍶", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
-  { id: "m13", name: "House Wine Glass", price: 700, emoji: "🍷", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" },
+  { id: "m1", name: "Coca-Cola 500ml", price: 350, emoji: "🥤", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000107"},
+  { id: "m2", name: "Salmon Bento Box", price: 1200, emoji: "🍱", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000204"},
+  { id: "m3", name: "Chicken Katsu Don", price: 980, emoji: "🍛", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000301"},
+  { id: "m4", name: "Draft Beer 500ml", price: 600, emoji: "🍺", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" , barcode: "49010000408"},
+  { id: "m5", name: "Salmon Sushi Set", price: 1450, emoji: "🍣", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000505"},
+  { id: "m6", name: "Restaurant Gift Card", price: 5000, emoji: "🎁", category: "Merchandise", badge: "0%", tax: "Standard Tax Item", disabled: true , barcode: "49010000602"},
+  { id: "m7", name: "Teriyaki Chicken Don", price: 980, emoji: "🍚", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000709"},
+  { id: "m8", name: "Gyoza (6 pcs)", price: 580, emoji: "🥟", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000806"},
+  { id: "m9", name: "Miso Soup", price: 280, emoji: "🍲", category: "Food", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010000903"},
+  { id: "m10", name: "Green Tea (Hot)", price: 300, emoji: "🍵", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010001000"},
+  { id: "m11", name: "Oolong Tea Bottle", price: 380, emoji: "🧃", category: "Beverages", badge: "10%", tax: "Reduced Tax Eligible" , barcode: "49010001107"},
+  { id: "m12", name: "Hot Sake 180ml", price: 750, emoji: "🍶", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" , barcode: "49010001204"},
+  { id: "m13", name: "House Wine Glass", price: 700, emoji: "🍷", category: "Alcohol", badge: "10%", tax: "Standard Tax Item" , barcode: "49010001301"},
 ];
 
 /* ---------------------------------- DUAL TAX ENGINE (JP Dual Tax Edition) ----------------------------------
@@ -3157,7 +3161,11 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
 
   const items = MENU_CATALOG.filter((m) => {
     if (category !== "All Categories" && m.category !== category) return false;
-    if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.trim().toLowerCase();
+      const hay = `${m.name} ${m.barcode || ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 
@@ -3600,7 +3608,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search Menu Items..."
+                placeholder="Search Menu Items / Scan Barcode..."
                 className="text-sm outline-none w-full placeholder:text-slate-400"
               />
             </div>
@@ -4519,7 +4527,8 @@ function SettlementPage() {
         b.outlet.toLowerCase().includes(q) ||
         b.bill.toLowerCase().includes(q) ||
         b.ref.toLowerCase().includes(q) ||
-        b.table.toLowerCase().includes(q)
+        b.table.toLowerCase().includes(q) ||
+        (b.barcode || "").toLowerCase().includes(q)
       );
     });
   }, [bills, search, billOf]);
@@ -4681,12 +4690,12 @@ const SUB_STORE_OPTIONS = ["AEON OMURA STORE", "MAIN STORE-HYAKUNEN PARK", "SUB 
 const REQUESTED_BY_OPTIONS = ["SUB STORE", "MAIN KITCHEN", "BAR", "HOUSEKEEPING"];
 
 const STORE_REQUEST_ITEM_CATALOG = [
-  { name: "PASTA PENNE (DIVELLA)", uom: "PACKET", group: "GROCERY", stock: 0 },
-  { name: "BASMATI RICE", uom: "KG", group: "GROCERY", stock: 45 },
-  { name: "OLIVE OIL (BERTOLLI)", uom: "BOTTLE", group: "GROCERY", stock: 12 },
-  { name: "CHICKEN BREAST", uom: "KG", group: "MEAT & POULTRY", stock: 8 },
-  { name: "MOZZARELLA CHEESE", uom: "KG", group: "DAIRY", stock: 3 },
-  { name: "TOMATO KETCHUP (HEINZ)", uom: "BOTTLE", group: "GROCERY", stock: 20 },
+  { name: "PASTA PENNE (DIVELLA)", uom: "PACKET", group: "GROCERY", stock: 0, barcode: "8076809513722" },
+  { name: "BASMATI RICE", uom: "KG", group: "GROCERY", stock: 45, barcode: "8901030510298" },
+  { name: "OLIVE OIL (BERTOLLI)", uom: "BOTTLE", group: "GROCERY", stock: 12, barcode: "8003855012354" },
+  { name: "CHICKEN BREAST", uom: "KG", group: "MEAT & POULTRY", stock: 8, barcode: "4901234880014" },
+  { name: "MOZZARELLA CHEESE", uom: "KG", group: "DAIRY", stock: 3, barcode: "8001234560079" },
+  { name: "TOMATO KETCHUP (HEINZ)", uom: "BOTTLE", group: "GROCERY", stock: 20, barcode: "0013000006101" },
 ];
 
 const STORE_REQUESTS = [
@@ -4727,7 +4736,8 @@ function StoreRequestListPage({ requests, onOpenNew }) {
       if (
         !String(r.requisitionNo).includes(q) &&
         !r.reqByCostCenter.toLowerCase().includes(q) &&
-        !r.storeSubStore.toLowerCase().includes(q)
+        !r.storeSubStore.toLowerCase().includes(q) &&
+        !(r.barcode || "").toLowerCase().includes(q)
       ) return false;
     }
     return true;
@@ -4749,7 +4759,7 @@ function StoreRequestListPage({ requests, onOpenNew }) {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search requisition, store..."
+              placeholder="Search requisition, store, barcode..."
               className="border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm w-52 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
             />
           </div>
@@ -4839,6 +4849,7 @@ function StoreRequestFormPage({ onSubmit }) {
     storeType: "STORE",
     storeSubStore: SUB_STORE_OPTIONS[1],
     itemName: "",
+    barcode: "",
     uom: "",
     itemGroup: "",
     currentStock: "",
@@ -4854,6 +4865,7 @@ function StoreRequestFormPage({ onSubmit }) {
     setForm((f) => ({
       ...f,
       itemName: name,
+      barcode: found?.barcode || "",
       uom: found?.uom || "",
       itemGroup: found?.group || "",
       currentStock: found ? String(found.stock) : "",
@@ -4899,7 +4911,9 @@ function StoreRequestFormPage({ onSubmit }) {
     setItems([]);
   };
 
-  const filteredItems = items.filter((it) => !listSearch || it.itemName.toLowerCase().includes(listSearch.toLowerCase()));
+  const filteredItems = items.filter(
+    (it) => !listSearch || `${it.itemName} ${it.barcode || ""}`.toLowerCase().includes(listSearch.trim().toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
@@ -5031,7 +5045,7 @@ function StoreRequestFormPage({ onSubmit }) {
               <input
                 value={listSearch}
                 onChange={(e) => setListSearch(e.target.value)}
-                placeholder="Search:"
+                placeholder="Search name / barcode"
                 className="border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
               />
             </div>
@@ -5456,7 +5470,13 @@ function OffPremiseOrdersPage({ icon: Icon, iconColor, iconBg, accentColor, titl
   const filtered = orders.filter((o) => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return o.id.toLowerCase().includes(q) || (o.guest || "").toLowerCase().includes(q) || (o.company || "").toLowerCase().includes(q);
+    const itemHay = (o.items || []).map((i) => `${i.name || ""} ${i.barcode || ""}`).join(" ").toLowerCase();
+    return (
+      o.id.toLowerCase().includes(q) ||
+      (o.guest || "").toLowerCase().includes(q) ||
+      (o.company || "").toLowerCase().includes(q) ||
+      itemHay.includes(q)
+    );
   });
 
   return (
@@ -5477,7 +5497,7 @@ function OffPremiseOrdersPage({ icon: Icon, iconColor, iconBg, accentColor, titl
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search Orders..."
+              placeholder="Search Orders / Barcode..."
               className="text-sm outline-none w-40 sm:w-56 placeholder:text-slate-400"
             />
           </div>
@@ -5869,7 +5889,11 @@ function BillReprintPage() {
     const q = search.trim().toLowerCase();
     if (!q) return REPRINT_BILLS;
     return REPRINT_BILLS.filter(
-      (b) => b.id.toLowerCase().includes(q) || b.ref.toLowerCase().includes(q) || b.mode.toLowerCase().includes(q)
+      (b) =>
+        b.id.toLowerCase().includes(q) ||
+        b.ref.toLowerCase().includes(q) ||
+        b.mode.toLowerCase().includes(q) ||
+        (b.barcode || "").toLowerCase().includes(q)
     );
   }, [search]);
 
@@ -5961,7 +5985,7 @@ function BillReprintPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search bill or ref"
+              placeholder="Search bill, ref or barcode"
               className={`${inputCls} pl-9 w-full sm:w-64`}
             />
           </div>
