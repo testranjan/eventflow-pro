@@ -3473,20 +3473,21 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
             <span className="font-semibold">-NPR {discountAmount.toLocaleString()}.00</span>
           </div>
         )}
-        <div className="flex justify-between items-center rounded-xl bg-slate-100 px-3.5 py-3 mb-4">
+        <div className="flex justify-between items-center rounded-xl bg-slate-100 px-3.5 py-3 mb-4 short:py-2 short:mb-2">
           <span className="text-sm font-bold text-slate-600">GRAND TOTAL</span>
-          <span className="text-lg font-extrabold text-slate-900">NPR {finalTotal.toLocaleString()}.00</span>
+          <span className="text-lg font-extrabold text-slate-900 short:text-base">NPR {finalTotal.toLocaleString()}.00</span>
         </div>
         {promo.enabled && (
           <button
             onClick={() => setShowPromoPicker(true)}
-            className="w-full mb-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border min-h-[44px]"
+            className="w-full mb-2 flex items-center justify-center gap-2 py-3 short:py-2 rounded-xl text-sm font-bold border min-h-[44px]"
             style={{ background: C.purpleLight, borderColor: "#E9D5FF", color: C.purple }}
           >
             <Tag size={16} /> Discount &amp; Loyalty
           </button>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
           <button
             disabled={cart.length === 0}
             onClick={() => setShowSettlement(true)}
