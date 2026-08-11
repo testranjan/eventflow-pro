@@ -3450,7 +3450,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
         ))}
       </div>
 
-      <div className="shrink-0 border-t border-slate-100 px-4 sm:px-5 pt-4 pb-4 sm:pb-5">
+      <div className="shrink-0 border-t border-slate-100 px-4 sm:px-5 pt-4 pb-4 sm:pb-5 short:pt-2.5 short:pb-2.5 max-h-[55vh] overflow-y-auto">
         <div className="flex justify-between text-sm text-slate-500 mb-1.5">
           <span>Subtotal</span><span className="font-semibold text-slate-700">NPR {subtotal.toLocaleString()}.00</span>
         </div>
