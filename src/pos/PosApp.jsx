@@ -3622,13 +3622,14 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
 
             <div className="flex-1 min-w-0 min-h-0 flex flex-col">
               <div className="text-xs font-bold text-slate-400 tracking-wide mb-2.5 sm:mb-3 hidden md:block shrink-0">ITEMS</div>
-              <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 sm:pr-1">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 sm:pr-1 pb-2">
                 <div
-                  className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:h-full"
+                  className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
                   style={{
-                    gridAutoRows: "minmax(140px, min(300px, calc((100% - 2rem) / 3)))",
+                    gridAutoRows: "minmax(150px, auto)",
                   }}
                 >
+
                   {items.map((item) => (
                     <MenuItemCard key={item.id} item={item} onAdd={openItem} rate={getTaxRate(item.tax, orderType)} />
                   ))}
