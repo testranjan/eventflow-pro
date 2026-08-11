@@ -3491,7 +3491,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={() => setShowSettlement(true)}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: "#4F46E5" }}
           >
             <CreditCard size={16} /> Pay Now
@@ -3499,7 +3499,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={() => setShowBilling(true)}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.greenLight, borderColor: "#BBF7D0", color: "#15803D" }}
           >
             <Receipt size={16} /> Billing
@@ -3507,7 +3507,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={handleHoldOrder}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-xs font-bold border min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.orangeLight, borderColor: "#FDE68A", color: "#B45309" }}
           >
             <PauseCircle size={16} /> Hold
@@ -3515,7 +3515,7 @@ function TouchOrderScreen({ table, onExit, initialOrderType = "Dine-in", require
           <button
             disabled={cart.length === 0}
             onClick={handlePlaceOrder}
-            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
+            className="flex flex-col items-center justify-center gap-1 py-3 sm:py-2.5 short:py-2 rounded-xl text-white text-xs font-bold min-h-[44px] transition-transform active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none"
             style={{ background: C.green }}
           >
             <CheckCircle2 size={16} /> Place Order
