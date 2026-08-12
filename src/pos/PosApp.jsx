@@ -4511,12 +4511,47 @@ function ViewBillModal({ bill, onClose, onSettle }) {
   );
 }
 
+function SettlementBillCard({ bill, onView, onSettle }) {
+  const taxable = Math.round(bill.amount / 1.1 * 100) / 100;
+  return (
+    <Card padded={false} className="overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50/70">
+        <span className="font-bold text-slate-800 text-[13px]">Bill #{bill.bill}</span>
+        <span className="font-extrabold text-[13px]" style={{ color: C.green }}>¥{bill.amount.toLocaleString()}.00</span>
+      </div>
+      <div className="px-4 py-3">
+        <ReprintRow label="Date" value={bill.date || "26/06/2026"} />
+        <ReprintRow label="Ref" value={bill.ref} />
+        <ReprintRow label={bill.table} value={bill.mode || (bill.table?.toLowerCase().includes("take") ? "Takeaway" : "Dine-in")} />
+        <ReprintRow label="Taxable Amt" value={taxable.toFixed(2)} strong />
+        <div className="flex items-center justify-between gap-3 pt-1.5">
+          <span className="text-[11px] text-slate-400">Settlement Status</span>
+          <SettlementStatusBadge status={bill.status} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+        <Button variant="secondary" size="sm" onClick={() => onView(bill)}>
+          <Eye size={13} /> View Bill
+        </Button>
+        <Button size="sm" disabled={bill.status !== "PENDING"} onClick={() => onSettle(bill)}>
+          <Wallet size={13} /> {bill.status === "PENDING" ? "Settle Bill" : "Settled"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 function SettlementPage() {
   const [bills, setBills] = useState(SETTLEMENT_BILLS);
   const [search, setSearch] = useState("");
   const [viewBill, setViewBill] = useState(null);
   const [settleBill, setSettleBill] = useState(null);
   const [billOf, setBillOf] = useState("ALL");
+  const [outlet, setOutlet] = useState(REPRINT_OUTLETS[0]);
+  const [settlementOf, setSettlementOf] = useState("BILL");
+  const [range, setRange] = useState("Today");
+  const [from, setFrom] = useState("2026-06-25");
+  const [to, setTo] = useState("2026-06-26");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -4537,6 +4572,7 @@ function SettlementPage() {
     const paymentLabel = entries.map((e) => e.methodLabel).join(" + ") || "—";
     setBills((prev) => prev.map((b) => (b.id === billId ? { ...b, status: "SETTLED", payment: paymentLabel } : b)));
     setViewBill(null);
+    setSettleBill(null);
   };
 
   const holdBill = (id) => {
@@ -4545,121 +4581,103 @@ function SettlementPage() {
   };
 
   return (
-    <div className="pb-8">
-      <div className="mb-5">
+    <div className="space-y-4 pb-8">
+      <div>
         <h1 className="text-xl font-bold text-slate-800">POS - Bill Settlement</h1>
         <p className="text-sm text-slate-400">Filter pending or settled bills and settle payments from here.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5 items-start">
-        {/* Filter Bills */}
-        <Card>
-          <div className="flex items-start gap-2.5 mb-4">
-            <Filter size={18} className="text-blue-500 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-slate-800">Filter Bills</h3>
-              <p className="text-xs text-slate-400">All the fields marked with an asterisk (*) are mandatory.</p>
-            </div>
-          </div>
-
-          <div className="space-y-3.5">
-            <Field label={<>Outlet <span className="text-red-500">*</span></>}>
-              <div className={`${inputCls} flex items-center justify-between`}>
-                <span className="truncate">Indian Restaurant Vishnu Express Kurume</span>
-                <X size={14} className="text-slate-400 shrink-0 ml-2" />
-              </div>
-            </Field>
-            <Field label={<>Settlement Of <span className="text-red-500">*</span></>}>
-              <select className={inputCls} defaultValue="BILL">
-                <option value="BILL">BILL</option>
-                <option value="TABLE">TABLE</option>
-                <option value="ORDER">ORDER</option>
-              </select>
-            </Field>
-            <Field label={<>Bill Of <span className="text-red-500">*</span></>}>
-              <select className={inputCls} value={billOf} onChange={(e) => setBillOf(e.target.value)}>
-                <option value="ALL">ALL</option>
-                <option value="PENDING">PENDING</option>
-                <option value="SETTLED">SETTLED</option>
-              </select>
-            </Field>
-          </div>
-
-          <div className="flex justify-end gap-2.5 mt-5">
-            <Button variant="secondary" onClick={() => { setBillOf("ALL"); setSearch(""); }}>Clear</Button>
-            <Button>Search</Button>
-          </div>
-        </Card>
-
-        {/* Settlement List */}
-        <Card padded={false} className="overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-4 flex-wrap">
-            <div className="flex items-center gap-2.5">
-              <List size={18} className="text-blue-500" />
-              <h3 className="font-bold text-slate-800">Settlement List</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Search:</span>
-              <div className="relative">
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-t border-b border-slate-100">
-                  {["Outlet", "Bill#", "Ref#", "Bill Amount", "Table / Take Away", "Status", "Action"].map((h) => (
-                    <th key={h} className="text-left text-slate-500 font-semibold text-xs uppercase tracking-wide px-4 py-3 whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((b) => (
-                  <tr key={b.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                    <td className="px-4 py-3 text-slate-700">{b.outlet}</td>
-                    <td className="px-4 py-3 font-semibold" style={{ color: C.blue }}>{b.bill}</td>
-                    <td className="px-4 py-3" style={{ color: C.blue }}>{b.ref}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-800">{b.amount.toLocaleString()}.00</td>
-                    <td className="px-4 py-3 text-slate-600">{b.table}</td>
-                    <td className="px-4 py-3"><SettlementStatusBadge status={b.status} /></td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setViewBill(b)}
-                          title="View bill"
-                          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button
-                          onClick={() => (b.status === "PENDING" ? setSettleBill(b) : setViewBill(b))}
-                          title="Settle bill"
-                          className="w-8 h-8 rounded-full flex items-center justify-center"
-                          style={{ background: b.status === "PENDING" ? C.blueLight : "#F1F5F9", color: b.status === "PENDING" ? C.blue : "#94A3B8" }}
-                        >
-                          <ReceiptText size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+      <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="lg:col-span-2">
+            <Field label="Outlet *">
+              <select className={inputCls} value={outlet} onChange={(e) => setOutlet(e.target.value)}>
+                {REPRINT_OUTLETS.map((o) => (
+                  <option key={o}>{o}</option>
                 ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">No bills match your filter.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+              </select>
+            </Field>
           </div>
-        </Card>
-      </div>
+          <Field label="Settlement Of *">
+            <select className={inputCls} value={settlementOf} onChange={(e) => setSettlementOf(e.target.value)}>
+              {["BILL", "TABLE", "ORDER"].map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </Field>
+          <div className="flex items-end">
+            <Button className="w-full">
+              <Search size={15} /> Search
+            </Button>
+          </div>
+        </div>
+
+        {range === "Custom Range" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <Field label="From Date *">
+              <input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} />
+            </Field>
+            <Field label="To Date *">
+              <input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} />
+            </Field>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          {REPRINT_RANGES.map((r) => {
+            const isActive = range === r;
+            return (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+                style={isActive ? { background: C.greenLight, borderColor: C.green, color: C.green } : { borderColor: "#E2E8F0", color: "#64748B" }}
+              >
+                <CalendarDays size={12} /> {r}
+                {r === "Custom Range" && <ChevronDown size={12} />}
+              </button>
+            );
+          })}
+          {["ALL", "PENDING", "SETTLED"].map((s) => (
+            <button
+              key={s}
+              onClick={() => setBillOf(s)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+              style={billOf === s ? { background: C.blueLight, borderColor: C.blue, color: C.blue } : { borderColor: "#E2E8F0", color: "#64748B" }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      <Card padded={false}>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Receipt size={16} color={C.green} />
+            <h3 className="font-bold text-slate-800">Bill List</h3>
+            <span className="text-xs text-slate-400">({filtered.length})</span>
+          </div>
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search bill, ref or barcode"
+              className={`${inputCls} pl-9 w-full sm:w-64`}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
+          {filtered.map((b) => (
+            <SettlementBillCard key={b.id} bill={b} onView={setViewBill} onSettle={setSettleBill} />
+          ))}
+          {filtered.length === 0 && (
+            <div className="col-span-full py-10 text-center text-sm text-slate-400">No bills match your filter.</div>
+          )}
+        </div>
+      </Card>
 
       {viewBill && (
         <ViewBillModal
@@ -4679,6 +4697,7 @@ function SettlementPage() {
     </div>
   );
 }
+
 
 /* ---------------------------------- STORE REQUEST ---------------------------------- */
 // Touching "Inventory" (Quick Action or sidebar nav) opens this module instead of a
