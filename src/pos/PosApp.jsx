@@ -4762,38 +4762,55 @@ function StoreRequestListPage({ requests, onOpenNew }) {
     return true;
   });
 
+  const FIELD_ROWS = (r) => [
+    ["Fiscal Year", r.fiscalYear],
+    ["Requisition Date", r.requisitionDate],
+    ["Req By Cost Center", r.reqByCostCenter],
+    ["Req By Sub Store", r.reqBySubStore],
+    ["Approval Level", r.approvalLevel],
+    ["Approved By", r.approvedBy],
+    ["Approved On", r.approvedOn],
+    ["Issue Indent #", r.issueIndentNo],
+    ["Is Purged", r.isPurged],
+    ["Updated By", r.updatedBy],
+    ["Updated On", r.updatedOn],
+    ["Created By", r.createdBy],
+    ["Created On", r.createdOn],
+  ];
+
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
+      <div className="grid gap-3 mb-3 lg:flex lg:flex-wrap lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Button size="sm"><Search size={14} /> Search</Button>
           <Button variant="secondary" size="sm" onClick={() => { setSearch(""); setFiscalYear("2082-2083"); setIsUsedFilter("All"); }}>
             <RotateCw size={14} className="rotate-45" /> Clear
           </Button>
           <Button variant="secondary" size="sm"><RotateCw size={14} /> Sync</Button>
+          <Button size="sm" className="lg:hidden ml-auto" onClick={onOpenNew}><Plus size={14} /> New</Button>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 lg:flex lg:flex-wrap">
+          <div className="relative min-w-0">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search requisition, store, barcode..."
-              className="border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm w-52 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+              className="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-sm lg:w-52 lg:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
             />
           </div>
-          <Button size="sm" onClick={onOpenNew}><Plus size={14} /> New Request</Button>
+          <Button size="sm" className="hidden lg:inline-flex" onClick={onOpenNew}><Plus size={14} /> New Request</Button>
         </div>
       </div>
 
       {/* Compact column filter bar — mirrors the highlighted filter row in the source report */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <select value={fiscalYear} onChange={(e) => setFiscalYear(e.target.value)} className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+      <div className="grid grid-cols-2 gap-2 mb-3 sm:flex sm:flex-wrap sm:items-center">
+        <select value={fiscalYear} onChange={(e) => setFiscalYear(e.target.value)} className="min-w-0 border border-slate-200 rounded-lg px-2.5 py-2 sm:py-1.5 text-xs text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
           <option>All</option>
           <option>2082-2083</option>
           <option>2081-2082</option>
         </select>
-        <select value={isUsedFilter} onChange={(e) => setIsUsedFilter(e.target.value)} className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select value={isUsedFilter} onChange={(e) => setIsUsedFilter(e.target.value)} className="min-w-0 border border-slate-200 rounded-lg px-2.5 py-2 sm:py-1.5 text-xs text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
           <option>All</option>
           <option>NOT USED</option>
           <option>PARTIALLY USED</option>
@@ -4801,7 +4818,33 @@ function StoreRequestListPage({ requests, onOpenNew }) {
         </select>
       </div>
 
-      <Card padded={false} className="overflow-hidden">
+      {/* Mobile / tablet: stacked cards so nothing is cut off */}
+      <div className="grid gap-3 xl:hidden">
+        {filtered.map((r) => (
+          <Card key={r.id} className="p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-bold" style={{ color: C.blue }}>Requisition #{r.requisitionNo}</p>
+                <p className="truncate text-xs font-medium mt-0.5" style={{ color: C.green }}>{r.storeSubStore}</p>
+              </div>
+              <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100" style={{ color: STORE_REQUEST_USED_TINT[r.isUsed] || "#64748B" }}>{r.isUsed}</span>
+            </div>
+            <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+              {FIELD_ROWS(r).map(([k, v]) => (
+                <div key={k} className="flex items-start justify-between gap-3 text-xs">
+                  <dt className="text-slate-400 shrink-0">{k}</dt>
+                  <dd className="min-w-0 text-right text-slate-600 break-words">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
+        ))}
+        {filtered.length === 0 && (
+          <Card className="p-8 text-center text-sm text-slate-400">No store requests match your filter.</Card>
+        )}
+      </div>
+
+      <Card padded={false} className="hidden xl:block overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -4855,6 +4898,18 @@ function StoreRequestListPage({ requests, onOpenNew }) {
           </div>
         </div>
       </Card>
+
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-400 xl:hidden">
+        <span className="min-w-0 truncate">Total Rows: <span className="font-semibold text-slate-600">{filtered.length}</span></span>
+        <div className="flex shrink-0 items-center gap-2">
+          <button className="px-3 py-2 rounded-lg border border-slate-200 flex items-center gap-1 text-slate-400 cursor-not-allowed">
+            <ChevronLeft size={13} /> Prev
+          </button>
+          <button className="px-3 py-2 rounded-lg text-white flex items-center gap-1" style={{ background: C.blue }}>
+            Next <ChevronRight size={13} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
